@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Complete Cookie Security Flags Guide</title>
+<style>
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    background:#0f172a;
+    color:#e2e8f0;
+    margin:0;
+    padding:40px;
+    line-height:1.6;
+}
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+h1{
+    text-align:center;
+    color:#38bdf8;
+    margin-bottom:40px;
+}
+.card{
+    background:#111827;
+    padding:20px 25px;
+    border-radius:12px;
+    margin-bottom:20px;
+    box-shadow:0 0 0 1px #1f2937;
+}
+h2{
+    margin-top:0;
+    color:#22c55e;
+}
+code{
+    background:#020617;
+    padding:4px 8px;
+    border-radius:6px;
+    color:#facc15;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+th, td{
+    border:1px solid #1f2937;
+    padding:10px;
+    text-align:left;
+}
+th{
+    background:#020617;
+    color:#38bdf8;
+}
+.note{
+    margin-top:10px;
+    color:#f87171;
+    font-weight:bold;
+}
+.footer{
+    margin-top:40px;
+    padding:20px;
+    background:#020617;
+    border-radius:12px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>🍪 Complete Cookie Security Flags Guide</h1>
+
+<div class="card">
+<h2>1️⃣ HttpOnly</h2>
+<p>Stops JavaScript from reading cookie.</p>
+<p><strong>Protects against:</strong> XSS token theft</p>
+<p><strong>Use when:</strong> cookie stores auth/session/refresh token</p>
+<code>HttpOnly</code>
+</div>
+
+<div class="card">
+<h2>2️⃣ Secure</h2>
+<p>Cookie only sent over HTTPS.</p>
+<p><strong>Protects against:</strong> network sniffing, downgrade attacks</p>
+<code>Secure</code>
+<p class="note">Never deploy auth cookies without this in production.</p>
+</div>
+
+<div class="card">
+<h2>3️⃣ SameSite</h2>
+<p>Controls cross-site sending.</p>
+<p><strong>Protects against:</strong> CSRF</p>
+
+<table>
+<tr>
+<th>Value</th>
+<th>Behavior</th>
+<th>Use Case</th>
+</tr>
+<tr>
+<td>Strict</td>
+<td>Never cross-site</td>
+<td>Banking / Admin panels</td>
+</tr>
+<tr>
+<td>Lax</td>
+<td>Top-level navigation only</td>
+<td>Most applications</td>
+</tr>
+<tr>
+<td>None</td>
+<td>Always send</td>
+<td>Cross-domain authentication</td>
+</tr>
+</table>
+
+<p><code>SameSite=Strict</code></p>
+</div>
+
+<div class="card">
+<h2>4️⃣ Path</h2>
+<p>Limits where cookie is sent.</p>
+<p>Example:</p>
+<code>Path=/api</code>
+<p>Cookie not sent to:</p>
+<code>/public</code>
+<p>Reduces attack surface.</p>
+</div>
+
+<div class="card">
+<h2>5️⃣ Domain</h2>
+<p>Controls which subdomains receive cookie.</p>
+<p>Example:</p>
+<code>Domain=example.com</code>
+
+<p>Sent to:</p>
+<ul>
+<li>api.example.com</li>
+<li>admin.example.com</li>
+</ul>
+
+<p>If omitted → only exact domain.</p>
+
+<p><strong>Best practice:</strong> Don’t set Domain unless subdomain sharing is required.</p>
+</div>
+
+<div class="card">
+<h2>6️⃣ Max-Age / Expires</h2>
+<p>Controls lifetime.</p>
+<p>Short lifetime reduces risk if stolen.</p>
+<code>Max-Age=900</code>
+<p>= 15 minutes.</p>
+</div>
+
+<div class="card">
+<h2>7️⃣ Priority (Modern Browsers)</h2>
+<p>Hints browser which cookies to keep under limits.</p>
+<code>Priority=High</code>
+<p>Useful for auth cookies so they aren’t evicted.</p>
+</div>
+
+<div class="card">
+<h2>8️⃣ Partitioned (Advanced)</h2>
+<p>Prevents third-party cookie tracking abuse.</p>
+<p>Mainly used for embedded widgets / iframes.</p>
+<p>Not needed for most authentication systems yet.</p>
+</div>
+
+<div class="footer">
+<h2>🏆 Production-Grade Example</h2>
+<p>Recommended refresh token cookie configuration:</p>
+
+<pre><code>Set-Cookie:
+refresh_token=xyz;
+Path=/;
+HttpOnly;
+Secure;
+SameSite=Strict;
+Max-Age=604800</code></pre>
+
+<p><strong>This configuration is considered a strong baseline security standard.</strong></p>
+</div>
+
+</div>
+</body>
+</html>
