@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>How JWT Works - Cryptographic Signing & Verification</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 40px;
+            line-height: 1.7;
+            background-color: #f9fafb;
+            color: #111827;
+        }
+        h1, h2, h3 {
+            color: #1f2937;
+        }
+        code {
+            background: #e5e7eb;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        pre {
+            background: #111827;
+            color: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .box {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 10px;
+            margin-bottom: 32px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+        }
+        ul {
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Deep Explanation: How JWT Signing & Verification Works</h1>
+
+    <div class="box">
+        <h2>1. What JWT Really Is</h2>
+        <p>
+            JWT (JSON Web Token) is a digitally signed message format. It is not encrypted by default.
+            Anyone can read the payload. The security comes from the cryptographic signature.
+        </p>
+        <p>
+            The signature guarantees:
+        </p>
+        <ul>
+            <li>Integrity – the message was not modified</li>
+            <li>Authenticity – the issuer really created it</li>
+        </ul>
+    </div>
+
+    <div class="box">
+        <h2>2. JWT Structure</h2>
+        <pre>
+HEADER.PAYLOAD.SIGNATURE
+        </pre>
+        <p>Each part is Base64URL encoded.</p>
+    </div>
+
+    <div class="box">
+        <h2>3. Header Example</h2>
+        <pre>{
+  "alg": "RS256",
+  "typ": "JWT"
+}</pre>
+        <p>
+            RS256 means:
+        </p>
+        <ul>
+            <li>RSA algorithm</li>
+            <li>SHA-256 hashing</li>
+            <li>Asymmetric cryptography (private key signs, public key verifies)</li>
+        </ul>
+    </div>
+
+    <div class="box">
+        <h2>4. Payload Example</h2>
+        <pre>{
+  "sub": "123456",
+  "role": "admin",
+  "iat": 1710000000,
+  "exp": 1710003600
+}</pre>
+        <p>
+            The payload is NOT secret. It is only protected against tampering.
+        </p>
+    </div>
+
+    <div class="box">
+        <h2>5. How The Signature Is Formed (Mathematical View)</h2>
+
+        <h3>Step 1 — Encode</h3>
+        <pre>
+encodedHeader  = Base64UrlEncode(header)
+encodedPayload = Base64UrlEncode(payload)
+        </pre>
+
+        <h3>Step 2 — Create Signing Input</h3>
+        <pre>
+signingInput = encodedHeader + "." + encodedPayload
+        </pre>
+
+        <h3>Step 3 — Hash</h3>
+        <pre>
+hash = SHA256(signingInput)
+        </pre>
+
+        <h3>Step 4 — Sign With Private Key</h3>
+        <pre>
+signature = RSA_sign(hash, privateKey)
+        </pre>
+
+        <h3>Step 5 — Encode Signature</h3>
+        <pre>
+encodedSignature = Base64UrlEncode(signature)
+        </pre>
+
+        <p>Final JWT:</p>
+        <pre>
+encodedHeader.encodedPayload.encodedSignature
+        </pre>
+    </div>
+
+    <div class="box">
+        <h2>6. Why The Private Key Is NOT Inside The Signature</h2>
+        <p>
+            The private key is never embedded in the token.
+            It is used only to mathematically generate the signature.
+        </p>
+        <p>
+            Think of it like this:
+        </p>
+        <ul>
+            <li>The private key is a secret stamping tool.</li>
+            <li>The signature is the stamp impression on the paper.</li>
+        </ul>
+        <p>
+            When you see a wax seal from a king, the seal does not contain the king's ring.
+            It contains the impression made by the ring.
+        </p>
+        <p>
+            You cannot recreate the ring from the wax impression.
+            But you can verify the seal using a known reference of the king's seal (public key).
+        </p>
+        <p>
+            Mathematically, RSA signing is a one-way operation:
+        </p>
+        <pre>
+signature = hash^d mod n
+        </pre>
+        <p>
+            Where:
+        </p>
+        <ul>
+            <li>d = private exponent (secret)</li>
+            <li>n = modulus</li>
+        </ul>
+        <p>
+            The public key contains (e, n). It cannot derive d.
+        </p>
+    </div>
+
+    <div class="box">
+        <h2>7. How Verification Works</h2>
+        <p>
+            The receiver performs:
+        </p>
+        <pre>
+recomputedHash = SHA256(signingInput)
+verifiedHash   = RSA_verify(signature, publicKey)
+        </pre>
+        <p>
+            Internally, RSA verification does:
+        </p>
+        <pre>
+hash = signature^e mod n
+        </pre>
+        <p>
+            If the recomputed hash equals the verified hash → signature valid.
+        </p>
+        <p>
+            If the payload was changed by even 1 character, the hash changes completely,
+            and verification fails.
+        </p>
+    </div>
+
+    <div class="box">
+        <h2>8. King Stamp Analogy</h2>
+        <p>
+            Imagine:
+        </p>
+        <ul>
+            <li>The king writes a decree (payload).</li>
+            <li>He presses his royal ring (private key) into hot wax.</li>
+            <li>The wax seal is the signature.</li>
+        </ul>
+        <p>
+            Citizens:
+        </p>
+        <ul>
+            <li>Have an official drawing of the ring (public key).</li>
+            <li>They compare the seal against the known ring pattern.</li>
+        </ul>
+        <p>
+            If it matches → decree is authentic.
+            If someone forges it without the real ring → verification fails.
+        </p>
+        <p>
+            The ring never leaves the king. The wax seal does.
+        </p>
+    </div>
+
+    <div class="box">
+        <h2>9. Security Properties</h2>
+        <ul>
+            <li>Private key stays only on the issuing server</li>
+            <li>Public key can be distributed to many services</li>
+            <li>Signature cannot be reversed to obtain private key</li>
+            <li>Any tampering breaks verification</li>
+        </ul>
+    </div>
+
+    <div class="box">
+        <h2>10. Important Clarification</h2>
+        <p>
+            JWT with RS256 provides integrity and authenticity, not confidentiality.
+            If you need secrecy, you must encrypt the token (JWE) or use HTTPS.
+        </p>
+    </div>
+
+    <h2>Conclusion</h2>
+    <p>
+        A JWT signature is not a container of the private key.
+        It is the mathematical result of signing a hash using that private key.
+        The public key allows verification but cannot recreate the private key.
+    </p>
+
+</body>
+</html>
