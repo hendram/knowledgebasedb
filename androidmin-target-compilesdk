@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Android SDK Versioning Guide</title>
+
+<style>
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    background:#0f172a;
+    color:#e2e8f0;
+    margin:0;
+    padding:40px;
+    line-height:1.6;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    color:#38bdf8;
+    margin-bottom:40px;
+}
+
+.card{
+    background:#111827;
+    padding:20px 25px;
+    border-radius:12px;
+    margin-bottom:20px;
+    box-shadow:0 0 0 1px #1f2937;
+}
+
+h2{
+    margin-top:0;
+    color:#22c55e;
+}
+
+code{
+    background:#020617;
+    padding:4px 8px;
+    border-radius:6px;
+    color:#facc15;
+}
+
+pre{
+    background:#020617;
+    padding:15px;
+    border-radius:8px;
+    overflow:auto;
+    color:#facc15;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+th, td{
+    border:1px solid #1f2937;
+    padding:10px;
+    text-align:left;
+}
+
+th{
+    background:#020617;
+    color:#38bdf8;
+}
+
+.note{
+    margin-top:10px;
+    color:#f87171;
+    font-weight:bold;
+}
+
+.footer{
+    margin-top:40px;
+    padding:20px;
+    background:#020617;
+    border-radius:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📱 Android SDK Versioning Guide</h1>
+
+<div class="card">
+<h2>1️⃣ What Are Android SDK Versions?</h2>
+
+<p>Android applications declare three SDK values that control:</p>
+
+<ul>
+<li>Which devices can install the application</li>
+<li>Which Android behavior rules the app follows</li>
+<li>Which APIs are available during compilation</li>
+</ul>
+
+<table>
+<tr>
+<th>SDK Setting</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>minSdk</td>
+<td>Minimum Android version allowed to install the app</td>
+</tr>
+<tr>
+<td>targetSdk</td>
+<td>Android version behavior rules the app opts into</td>
+</tr>
+<tr>
+<td>compileSdk</td>
+<td>Android SDK used to compile the application</td>
+</tr>
+</table>
+
+</div>
+
+
+<div class="card">
+<h2>2️⃣ Example Configuration</h2>
+
+<p>A typical Android project configuration:</p>
+
+<pre><code>android {
+
+    compileSdk = 34
+
+    defaultConfig {
+
+        minSdk = 21
+        targetSdk = 34
+
+    }
+
+}</code></pre>
+
+<p>Meaning:</p>
+
+<ul>
+<li><code>minSdk = 21</code> → App supports Android 5.0 and newer</li>
+<li><code>targetSdk = 34</code> → App follows Android 14 behavior rules</li>
+<li><code>compileSdk = 34</code> → App compiled using Android 14 APIs</li>
+</ul>
+
+</div>
+
+
+<div class="card">
+<h2>3️⃣ Android Version Timeline Example</h2>
+
+<p>Example where compileSdk and targetSdk are different.</p>
+
+<pre><code>compileSdk = 34
+targetSdk  = 30
+minSdk     = 21</code></pre>
+
+<table>
+<tr>
+<th>Android Version</th>
+<th>SDK Level</th>
+<th>Release</th>
+</tr>
+<tr>
+<td>Android 5</td>
+<td>21</td>
+<td>Minimum supported device</td>
+</tr>
+<tr>
+<td>Android 7</td>
+<td>24</td>
+<td>Older devices still supported</td>
+</tr>
+<tr>
+<td>Android 11</td>
+<td>30</td>
+<td>Target behavior version</td>
+</tr>
+<tr>
+<td>Android 14</td>
+<td>34</td>
+<td>Compilation SDK</td>
+</tr>
+</table>
+
+<p>This configuration means:</p>
+
+<ul>
+<li>The app installs on Android 5 and newer</li>
+<li>The app behaves according to Android 11 rules</li>
+<li>The code is compiled using Android 14 APIs</li>
+</ul>
+
+</div>
+
+
+<div class="card">
+<h2>4️⃣ Installation Rule</h2>
+
+<p>Android uses a simple rule for installation.</p>
+
+<pre><code>if device_sdk &lt; minSdk
+    installation blocked
+
+if device_sdk ≥ minSdk
+    installation allowed</code></pre>
+
+<table>
+<tr>
+<th>Device Android Version</th>
+<th>SDK Level</th>
+<th>Installation Result</th>
+</tr>
+<tr>
+<td>Android 4</td>
+<td>19</td>
+<td>Blocked</td>
+</tr>
+<tr>
+<td>Android 7</td>
+<td>24</td>
+<td>Allowed</td>
+</tr>
+<tr>
+<td>Android 14</td>
+<td>34</td>
+<td>Allowed</td>
+</tr>
+</table>
+
+</div>
+
+
+<div class="card">
+<h2>5️⃣ Behavior Rule (Target SDK)</h2>
+
+<p>Target SDK determines which Android behavior rules the app follows.</p>
+
+<p>If the device runs a newer Android version than the target SDK, Android enables compatibility mode.</p>
+
+<pre><code>if device_sdk &gt; targetSdk
+    compatibility behavior applied</code></pre>
+
+<table>
+<tr>
+<th>Device SDK</th>
+<th>Target SDK</th>
+<th>Result</th>
+</tr>
+<tr>
+<td>24</td>
+<td>30</td>
+<td>Device uses native Android 7 behavior</td>
+</tr>
+<tr>
+<td>31</td>
+<td>30</td>
+<td>Compatibility mode (Android 11 behavior)</td>
+</tr>
+<tr>
+<td>34</td>
+<td>30</td>
+<td>Compatibility mode applied</td>
+</tr>
+</table>
+
+<p>This prevents older apps from breaking when Android introduces stricter rules.</p>
+
+</div>
+
+
+<div class="card">
+<h2>6️⃣ Why compileSdk Can Be Higher</h2>
+
+<p>The compile SDK only affects compilation.</p>
+
+<p>It does not affect runtime compatibility.</p>
+
+<p>Example code using a newer Android API:</p>
+
+<pre><code>if (Build.VERSION.SDK_INT >= 33) {
+    requestNotificationPermission()
+}</code></pre>
+
+<p>This allows the application to safely use modern APIs while still running on older Android devices.</p>
+
+</div>
+
+
+<div class="card">
+<h2>7️⃣ Real Production Example</h2>
+
+<p>Many production applications use different SDK levels during migration:</p>
+
+<pre><code>compileSdk = 34
+targetSdk  = 28
+minSdk     = 21</code></pre>
+
+<table>
+<tr>
+<th>Purpose</th>
+<th>Result</th>
+</tr>
+<tr>
+<td>compileSdk = 34</td>
+<td>Developers can use latest Android APIs</td>
+</tr>
+<tr>
+<td>targetSdk = 28</td>
+<td>App still behaves like Android 9</td>
+</tr>
+<tr>
+<td>minSdk = 21</td>
+<td>App supports Android 5 and newer</td>
+</tr>
+</table>
+
+<p>This setup is often used while updating legacy applications.</p>
+
+</div>
+
+
+<div class="card">
+<h2>8️⃣ Runtime Decision Flow</h2>
+
+<p>Android runtime behavior can be simplified into this decision flow:</p>
+
+<pre><code>1. Check installation
+
+if device_sdk &lt; minSdk
+    block installation
+
+
+2. Launch application
+
+if device_sdk ≥ minSdk
+    run application
+
+
+3. Apply behavior rules
+
+if device_sdk &gt; targetSdk
+    enable compatibility behavior</code></pre>
+
+</div>
+
+
+<div class="footer">
+
+<h2>🏆 Best Practice</h2>
+
+<table>
+<tr>
+<th>Setting</th>
+<th>Recommendation</th>
+</tr>
+<tr>
+<td>compileSdk</td>
+<td>Always use the latest stable Android SDK</td>
+</tr>
+<tr>
+<td>targetSdk</td>
+<td>Update regularly to comply with Google Play policies</td>
+</tr>
+<tr>
+<td>minSdk</td>
+<td>Choose based on the oldest device you want to support</td>
+</tr>
+</table>
+
+<p><strong>Modern production configuration example:</strong></p>
+
+<pre><code>compileSdk = 34
+targetSdk  = 34
+minSdk     = 21</code></pre>
+
+<p>This configuration supports most Android devices while using the latest platform APIs.</p>
+
+</div>
+
+</div>
+</body>
+</html>
